@@ -1,60 +1,144 @@
 ---
 layout: page
 title: Configuration
-subtitle: Getting Started
+subtitle: of the operating system
 menubar: door_menu
 show_sidebar: false
 toc: true
 ---
 
-## General Configuration
+## Image selection
 
-Much of a Jekyll's configuration is held in the `_config.yml` file in the project root. 
+I use the Raspberry Pi OS Lite (64bit) from the [Pi Imager](https://www.raspberrypi.com/software/). It can be found under Choose OS -> Raspberry Pi OS (Other)
 
-For information on general Jekyll configuration, please check out the [Jekyll docs](https://jekyllrb.com/docs/configuration/).
+I recommend configuring your wireless network and SSH in the imager to avoid having to plug in screens or keyboards
 
-Below are some specific options that you might want to set in your `_config.yml` when using Bulma Clean Theme.
+### Upgrading the OS
 
-## Lang
+This is probably resolved, however I had some hardware issues with the latest images so I used the legacy image and then [manually upgraded the OS](https://gist.github.com/jauderho/6b7d42030e264a135450ecc0ba521bd8)
 
-The html lang attribute is set to `en` by default but you can override this in the _config.yml file `lang: en`
+On a Pi4 I also had to change the wpa_supplicant service
 
-## Direction
-The html _dir_ attribute is set to `ltr` by default. It can be overridden in the _config.yml file like `direction: rtl`. 
+```shell
+sudo vim /lib/systemd/system/wpa_supplicant.service
+ExecStart=/sbin/wpa_supplicant -iwlan0 -c/etc/wpa_supplicant/wpa_supplicant.conf -u -s
+sudo systemctl daemon-reload
+sudo systemctl restart wpa_supplicant.service
 
-## Google Analytics 
+Then needed to install: sudo apt install dhcpcd5
+sudo systemctl enable dhcpcd
+sudo systemctl start dhcpcd
 
-To enable Google Analytics add `google_analytics: UA-xxxxxxxx` to your `_config.yml` replacing the UA-xxxxxxxx with your Google Analytics property.
-
-```yaml
-google_analytics: UA-xxxxxxxx
+sudo vim /etc/avahi/avahi-daemon.conf
+allow-interfaces=eth0,wlan0
 ```
 
-## GitHub Sponsor
+## Install dependencies
 
-If you have a GitHub sponsors account set up, you can add your username to `gh_sponsor` in the `_config.yml` file and it will display a link to your profile on the right of the navbar.
+```shell
+sudo su
 
-```yaml
-gh_sponsor: chrisrhymes
+apt update
+apt upgrade && apt dist-upgrade
+
+# a decent editor
+apt install vim
+
+# IO pin control
+apt install gpiod libgpiod-dev
+
+# network utils
+apt install dnsutils
+
+# pijuice_cli tool
+apt install pijuice-base
 ```
 
-Further information on Sponsors feature available in the [Sponsors docs page](/bulma-clean-theme/docs/sponsors/).
+To install docker-compose the [apt repository needs to be added](https://docs.docker.com/engine/install/debian/#install-using-the-repository)
 
-## Disqus
-
-Disqus comments are available for posts. To be able to use them, you need to set your disqus shortname in `_config.yml`. 
-```
-disqus.shortname=<example-com.disqus.com>  
+```shell
+apt update
+sudo apt install docker-compose
 ```
 
-Need help finding your Disqus Shortname?  [See this helpful post by Disqus on the matter.](https://help.disqus.com/en/articles/1717111-what-s-a-shortname)  
+Then follow the [post install instructions](https://docs.docker.com/engine/install/linux-postinstall/) to have docker available for your user.
 
-Then you need to set your Jekyll environment to production: 
+## Configure environment
 
-```JEKYLL_ENV=production bundle exec jekyll build```. 
+I like vim so I set it up to work without mouse support:
 
-Post comments are enabled by default if disqus is enabled. If you want to disable comments on a specific post, set the following in the post's front matter: 
-
-```markdown
-comments: false
+```shell
+echo "set mouse-=a" >> ~/.vimrc
+sudo su
+echo "set mouse-=a" >> ~/.vimrc
 ```
+
+then I ensure it's my default editor
+
+1. run `select-editor`
+2. select vim-basic
+
+add any additional wireless networks
+
+```shell
+vim /etc/wpa_supplicant/wpa_supplicant.conf
+
+# network={
+#         ssid="deploy-network"
+#         psk="password"
+# }
+```
+
+## Reduce power consumption
+
+### Disable CPU cores
+
+Run on a single CPU core as this can half the power consumption of the device
+
+* Edit `/boot/cmdline.txt` file and add `maxcpus=1` after `console=tty1`
+* Run: `lscpu` to confirm
+
+### Disable the power LED
+
+Add to `/boot/config.txt` for the PI Zero W
+
+```
+# Disable the ACT LED on the Pi Zero.
+dtparam=act_led_trigger=none
+dtparam=act_led_activelow=on
+```
+
+For other PIs see: https://www.jeffgeerling.com/blogs/jeff-geerling/controlling-pwr-act-leds-raspberry-pi
+
+### Disable HDMI
+
+Use: `sudo raspi-config`, select Display and blank display
+
+## Configure access to GPIO
+
+This will allow your user and the door control service to interact with the GPIO chips on the Pi.
+
+```shell
+git clone https://github.com/stakach/ladies-first-chicken-door
+cd ladies-first-chicken-door
+./scripts/setup_gpio.sh
+```
+
+This script does the following:
+
+1. creates a gpio-users users group
+1. adds the current user to the group
+1. adds a [udev rule](https://opensource.com/article/18/11/udev) allowing read and write access
+
+This ensures secure access to the hardware
+
+## Configure PiJuice
+
+The [PiJuice Power Management HAT](https://github.com/PiSupply/PiJuice) requires a schedule to be in place for it to start the Pi if it's goes offline. This means we really need to ensure the schedule is set and the example scripts can be used to ensure this is done (see the scripts for more details).
+
+Using the `pijuice_cli` configure the following:
+
+1. configure the battery type that is installed
+1. configure the full path to `pi_juice_poweroff.py` script as `USER FUNC1`
+1. configure System Events so that Low Charge executes USER FUNC1
+1. I also disable the physical buttons

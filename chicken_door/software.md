@@ -1,60 +1,102 @@
 ---
 layout: page
-title: Configuration
-subtitle: Getting Started
+title: Software
+subtitle: user land
 menubar: door_menu
 show_sidebar: false
 toc: true
 ---
 
-## General Configuration
+## Door control service
 
-Much of a Jekyll's configuration is held in the `_config.yml` file in the project root. 
+Setup the [primary door control service](https://github.com/stakach/ladies-first-chicken-door):
 
-For information on general Jekyll configuration, please check out the [Jekyll docs](https://jekyllrb.com/docs/configuration/).
+```shell
+git clone https://github.com/stakach/ladies-first-chicken-door
+cd ladies-first-chicken-door
+docker-compose up -d
+```
 
-Below are some specific options that you might want to set in your `_config.yml` when using Bulma Clean Theme.
+Once running you should generate a new [TOTP secret](https://medium.com/@nicola88/two-factor-authentication-with-totp-ccc5f828b6df), I personally use [2FAS Auth](https://2fas.com/) as my 2fa application
 
-## Lang
+```shell
+docker exec ladiesfirst /doorctrl --totp
 
-The html lang attribute is set to `en` by default but you can override this in the _config.yml file `lang: en`
+# copy the secret generated and update the config
+vi ./docker-compose.yml
+docker-compose up -d
+```
 
-## Direction
-The html _dir_ attribute is set to `ltr` by default. It can be overridden in the _config.yml file like `direction: rtl`. 
+You can then add this to your 2FA application by [generating a QR code](https://smo.cx/) with the following content: (paste it as text in the generator)
 
-## Google Analytics 
+`otpauth://totp/Chicken%20Door?secret=<secret generated above>`
 
-To enable Google Analytics add `google_analytics: UA-xxxxxxxx` to your `_config.yml` replacing the UA-xxxxxxxx with your Google Analytics property.
+This will be used as your password for accessing the service
+
+### Relay lines
+
+Depending on your hardware, you may have different pins corresponding to relay control.
+
+![pinout](/stakach.github.io/img/pi-zero-2w-pinout.webp)
+
+According to the docs on [the relay board](https://thepihut.com/products/zero-relay-2-channel-5v-relay-board-for-pi-zero) I'm using, relay channels 1 and 2 are connected with pin numbers 15 and 29 of the Raspberry Pi GPIO respectively
+
+So given the output from running: `gpioinfo`
+
+* Relay channel 1: pin15 => GPIO22, line 22
+* Relay channel 2: pin29 => GPIO5, line 5
+
+Which are also defined in the `docker-compose.yml` file
+
+## Cloudflare DDNS
+
+For simplified access I configured [cloudflare as my dynamic DNS service provider](https://github.com/timothymiller/cloudflare-ddns).
+
+Add this to the `docker-compose.yml` file:
 
 ```yaml
-google_analytics: UA-xxxxxxxx
+  cloudflare-ddns:
+    image: timothyjmiller/cloudflare-ddns:latest
+    container_name: cloudflare-ddns
+    security_opt:
+      - no-new-privileges:true
+    network_mode: 'host'
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /home/steve/ddns_config.json:/config.json
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 ```
 
-## GitHub Sponsor
+My network is IPv6 enabled and my ISP uses [Carrier-grade NAT](https://en.wikipedia.org/wiki/Carrier-grade_NAT) for IPv4 so I expose this as an IPv6 website and allowed my Pi MAC + service port combination through the firewall
 
-If you have a GitHub sponsors account set up, you can add your username to `gh_sponsor` in the `_config.yml` file and it will display a link to your profile on the right of the navbar.
+my `ddns_config.json`
 
-```yaml
-gh_sponsor: chrisrhymes
-```
-
-Further information on Sponsors feature available in the [Sponsors docs page](/bulma-clean-theme/docs/sponsors/).
-
-## Disqus
-
-Disqus comments are available for posts. To be able to use them, you need to set your disqus shortname in `_config.yml`. 
-```
-disqus.shortname=<example-com.disqus.com>  
-```
-
-Need help finding your Disqus Shortname?  [See this helpful post by Disqus on the matter.](https://help.disqus.com/en/articles/1717111-what-s-a-shortname)  
-
-Then you need to set your Jekyll environment to production: 
-
-```JEKYLL_ENV=production bundle exec jekyll build```. 
-
-Post comments are enabled by default if disqus is enabled. If you want to disable comments on a specific post, set the following in the post's front matter: 
-
-```markdown
-comments: false
+```json
+{
+  "cloudflare": [
+    {
+      "authentication": {
+        "api_token": "your-api-token-here"
+      },
+      "zone_id": "your-cloudflare-zone",
+      "subdomains": [
+        {
+          "name": "ladiesfirst",
+          "proxied": false
+        }
+      ]
+    }
+  ],
+  "a": false,
+  "aaaa": true,
+  "purgeUnknownRecords": false,
+  "ttl": 300
+}
 ```

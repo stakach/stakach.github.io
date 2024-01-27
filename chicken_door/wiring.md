@@ -46,8 +46,9 @@ So given the red wire is common but needs to be connected to both relay modules,
 ![relay wiring](/stakach.github.io/img/relay-wiring.png)
 
 * NO (Normally Open) Switch = Stays in open state, circuit disconnected, unless the relay is active
-* NC (Normally Closed) Switch = Stays in closed state unless the condition is met
+* NC (Normally Closed) Switch = Stays in closed state, circuit active, unless the relay is active
 
 The wiring in the diagram represents fallback to auto / sensor, both yellow and green wires connected to the NO terminal.
 
-To fallback to closed state then the green wire should be moved to the NC terminal.
+To fallback to a closed state on failure then the green wire should be moved to the NC terminal.
+NOTE: You will have to update the scripts to expect this as closed relay inactive will now close the door
