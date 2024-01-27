@@ -1,0 +1,12 @@
+- label: Build Guide
+  items:
+    - name: Overview
+      link: /chicken_door/
+    - name: Wiring
+      link: /chicken_door/wiring/
+    - name: OS Configuration
+      link: /chicken_door/configuration/
+    - name: Software Overview
+      link: /chicken_door/software/
+    - name: Scripts
+      link: /chicken_door/scripts/

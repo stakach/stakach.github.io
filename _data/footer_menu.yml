@@ -1,0 +1,8 @@
+- name: About
+  link: /
+- name: Chickens
+  link: /chickens/
+- name: Chicken Door
+  link: /chicken_door/
+- name: Catling Gun
+  link: /catling_gun/
