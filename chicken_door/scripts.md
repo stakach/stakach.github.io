@@ -48,17 +48,14 @@ Configure CRON jobs to run throughout the day: `crontab -e`
 
 ```
 # open at 10am
-0 10 * * * /home/steve/door_sensor.sh
+0 10 * * * /home/steve/ladies-first-chicken-door/scripts/door_sensor.sh
 
 # close at 9pm (door will have sensor closed already)
-0 21 * * * /home/steve/door_close.sh
+0 21 * * * /home/steve/ladies-first-chicken-door/scripts/door_close.sh
 
 # power off the computer at 9:30pm
-30 21 * * * /home/steve/pi_juice_poweroff.py
-
-# power off the computer at 9:30pm
-30 21 * * * /usr/bin/python3 /home/steve/pi_juice_poweroff.py
+30 21 * * * /usr/bin/python3 /home/steve/ladies-first-chicken-door/scripts/pi_juice_poweroff.py
 
 # ensure the power schedule is configured (every hour)
-0 * * * * /usr/bin/python3 /home/steve/pi_juice_poweron_config.py
+0 * * * * /usr/bin/python3 /home/steve/ladies-first-chicken-door/scripts/pi_juice_poweron_config.py
 ```
