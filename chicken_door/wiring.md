@@ -14,7 +14,7 @@ toc: true
 
 This modification is therefore non-destructive as we can wire a new RJ14 cable into the relay HAT for the Pi and plug this into the door controller.
 
-![wiring overview](/stakach.github.io/img/door-wiring-overview.png)
+![wiring overview](/img/door-wiring-overview.png)
 
 ## Failure modes
 
@@ -33,17 +33,17 @@ The benefit being that if the computer were to fail during the day, the chickens
 
 Only 3 of the 4 RJ14 wires are used when connected to the switch
 
-<img src="/stakach.github.io/img/toggle-switch.png" width="500em" alt="toggle switch wiring">
+<img src="/img/toggle-switch.png" width="500em" alt="toggle switch wiring">
 
 * Closed == Red + Green
 * Sensor == no connection
 * Opened == Red + Yellow
 
-<img src="/stakach.github.io/img/rj14-pinout.png" width="150em" alt="RJ14 pinout">
+<img src="/img/rj14-pinout.png" width="150em" alt="RJ14 pinout">
 
 So given the red wire is common but needs to be connected to both relay modules, after stripping the RJ45 cable I used the spare black wire as a bridge.
 
-![relay wiring](/stakach.github.io/img/relay-wiring.png)
+![relay wiring](/img/relay-wiring.png)
 
 * NO (Normally Open) Switch = Stays in open state, circuit disconnected, unless the relay is active
 * NC (Normally Closed) Switch = Stays in closed state, circuit active, unless the relay is active

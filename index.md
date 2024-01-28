@@ -9,7 +9,7 @@ show_sidebar: false
 # Welcome
 
 <div style="float: left; margin-right: 2em;">
-    <img src="/stakach.github.io/img/steve-and-ange.jpg" alt="beware the agapanthus">
+    <img src="/img/steve-and-ange.jpg" alt="beware the agapanthus">
 </div>
 
 Hello and welcome to the personal page of Angela and Stephen von Takach.

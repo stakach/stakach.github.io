@@ -6,7 +6,7 @@ email: steve@vontaka.ch
 description: >
   Steve and Ange's personal blog
 remote_theme: chrisrhymes/bulma-clean-theme
-baseurl: "/stakach.github.io"
+# baseurl: "/"
 
 twitter_username: stakach
 github_username:  stakach

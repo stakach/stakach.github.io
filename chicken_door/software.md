@@ -37,7 +37,7 @@ This will be used as your password for accessing the service
 
 Depending on your hardware, you may have different pins corresponding to relay control.
 
-![pinout](/stakach.github.io/img/pi-zero-2w-pinout.webp)
+![pinout](/img/pi-zero-2w-pinout.webp)
 
 According to the docs on [the relay board](https://thepihut.com/products/zero-relay-2-channel-5v-relay-board-for-pi-zero) I'm using, relay channels 1 and 2 are connected with pin numbers 15 and 29 of the Raspberry Pi GPIO respectively
 
