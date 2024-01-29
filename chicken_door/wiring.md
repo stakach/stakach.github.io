@@ -18,7 +18,7 @@ This modification is therefore non-destructive as we can wire a new RJ14 cable i
 
 ## Failure modes
 
-There are two ways the door should can be configured depending on your primary use case
+There are two ways the door can be configured depending on your primary use case
 
 1. fallback auto - fall back to the light sensor if the computer fails
 1. fallback close - close the door if the computer fails
