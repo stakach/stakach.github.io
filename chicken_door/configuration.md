@@ -33,6 +33,16 @@ sudo vim /etc/avahi/avahi-daemon.conf
 allow-interfaces=eth0,wlan0
 ```
 
+## Resize the primary partition
+
+```shell
+sudo apt install cloud-guest-utils
+# lsblk or fdisk -l to identify partitions.
+growpart /dev/mmcblk1 2
+resize2fs /dev/mmcblk1p2
+df -h
+```
+
 ## Install dependencies
 
 ```shell
