@@ -64,14 +64,8 @@ apt install dnsutils
 apt install pijuice-base
 ```
 
-To install docker-compose the [apt repository needs to be added](https://docs.docker.com/engine/install/debian/#install-using-the-repository)
-
-```shell
-apt update
-sudo apt install docker-compose
-```
-
-Then follow the [post install instructions](https://docs.docker.com/engine/install/linux-postinstall/) to have docker available for your user.
+* To install docker-compose the [apt repository needs to be added](https://docs.docker.com/engine/install/debian/)
+* Then follow the [post install instructions](https://docs.docker.com/engine/install/linux-postinstall/) to have docker available for your user.
 
 ## Configure environment
 
@@ -97,6 +91,18 @@ vim /etc/wpa_supplicant/wpa_supplicant.conf
 #         ssid="deploy-network"
 #         psk="password"
 # }
+```
+
+limit logging to not use all the disk space
+
+```shell
+sudo vi /etc/systemd/journald.conf
+
+SystemMaxUse=500M
+SystemMaxFileSize=100M
+SystemKeepFree=500M
+
+sudo systemctl restart systemd-journald
 ```
 
 ## Reduce power consumption
